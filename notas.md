@@ -1,0 +1,1 @@
+Fluxo: Front-end faz a requisição para o back-end que bate na API da abacatePay com os dados do form que vem do front-end

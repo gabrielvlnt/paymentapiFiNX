@@ -1,0 +1,14 @@
+services:
+  payment:
+    build: .
+    container_name: payment_api
+    ports:
+    - "8000:8000"
+    volumes:
+    - ./:/app
+    environment:
+    - API_KEY='abc_dev_NXfgterzK1nhfQpNBFd4xSX6'
+    - SECRET_KEY='66ççpp'
+    depends_on:
+    - db
+  mongodb:
