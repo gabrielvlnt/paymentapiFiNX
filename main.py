@@ -1,8 +1,8 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from api.v1.payment import payment_router
+from dotenv import load_dotenv
 import uvicorn
-
 
 app = FastAPI()
 

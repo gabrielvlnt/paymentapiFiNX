@@ -1,13 +1,17 @@
-from fastapi import APIRouter, status, Form, HTTPException
-from schema.payment import UserPayment
-from services.payment import create_product, create_client
+from fastapi import APIRouter, status, Form, HTTPException, Depends
+from models.payment import Customer
+from db.session import get_db
+from pymongo.mongo_client import MongoClient
+from services.payment import pay_url, create_customer
+
 
 payment_router = APIRouter(prefix='/payment', tags=['payment'])
 
+
 @payment_router.post('/create-payment', status_code=status.HTTP_202_ACCEPTED)
-async def criar_pagamento(form_data: UserPayment):
-    return await create_product(form_data)
+async def create_payment(db = Depends(get_db)):
+    return await pay_url(db)
 
 @payment_router.post('/create-client', status_code=status.HTTP_201_CREATED)
-async def criar_cliente(form_data: UserPayment):
-    return await create_client(form_data)
+async def create_client(db = Depends(get_db)):
+    return await create_customer(db)

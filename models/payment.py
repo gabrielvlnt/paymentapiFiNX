@@ -14,6 +14,6 @@ class Payment(BaseModel):
 class Customer(BaseModel):
     name: str
     cellphone: str
-    email: EmailStr
+    email: str
     taxId: str 
     customer_id: str

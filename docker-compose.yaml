@@ -7,8 +7,8 @@ services:
     volumes:
     - ./:/app
     environment:
-    - API_KEY='abc_dev_NXfgterzK1nhfQpNBFd4xSX6'
+    - API_KEY=abc_dev_UNdBUnfUbf1z4Mh2Y2twc4jQ
     - SECRET_KEY='66ççpp'
-    depends_on:
-    - db
-  mongodb:
+    - MONGO_URL=mongodb+srv://gabrielvlnt:Torreogo.12@paymentapi.lx4xcuv.mongodb.net/?retryWrites=true&w=majority&appName=paymentapi
+
+

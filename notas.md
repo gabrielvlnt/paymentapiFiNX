@@ -1,1 +1,10 @@
-Fluxo: Front-end faz a requisição para o back-end que bate na API da abacatePay com os dados do form que vem do front-end
+
+Configurar o webhook depois
+
+Necessario ainda criar um sistema de estoque para retornar á API payment os dados do produto, como preço, descrição e etc
+
+
+Testar com credenciais e inputs invalidos
+testar cenarios de erro
+
+Estudar mais mocks
