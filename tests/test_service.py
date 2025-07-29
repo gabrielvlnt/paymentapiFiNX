@@ -1,7 +1,8 @@
 import pytest
 from fastapi.testclient import TestClient
 from mongomock import MongoClient
-from unittest.mock import AsyncMock, patch
+from unittest.mock import AsyncMock, patch, MagicMock
+from httpx import HTTPStatusError, Request
 from db.session import get_db
 from main import app
 
@@ -29,7 +30,8 @@ def test_client():
 async def test_create_payment(test_client, mock_mongo):
     mock_response = AsyncMock()
     mock_response.status_code = 200
-    mock_response.json = AsyncMock(return_value={
+    mock_response.raise_for_status = AsyncMock()
+    mock_response.json = MagicMock(return_value={
         "data": {
             "products": [
                 {
@@ -71,10 +73,11 @@ async def test_create_payment(test_client, mock_mongo):
 
 
 @pytest.mark.asyncio
-def test_create_customer(test_client, mock_mongo):
+async def test_create_customer(test_client, mock_mongo):
     mock_response = AsyncMock
     mock_response.status_code = 200
-    mock_response.json = AsyncMock(return_value={
+    mock_response.raise_for_status = AsyncMock()
+    mock_response.json = MagicMock(return_value={
         "error": None,
         "data": {
             "id": "cust_454ARWjm1XMUf6FkAuCrTnbg",
@@ -94,3 +97,4 @@ def test_create_customer(test_client, mock_mongo):
         customers = mock_mongo['customers'].find_one({'customer_id': 'cust_454ARWjm1XMUf6FkAuCrTnbg'})
         assert customers is not None
         assert customers['name'] == 'Gabriel Valente de Oliveira'
+

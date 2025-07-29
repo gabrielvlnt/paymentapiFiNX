@@ -4,13 +4,29 @@ from db.session import insert_customer, insert_payment
 from abacatepay.products import Product
 from dotenv import load_dotenv
 from models.payment import Payment, Customer
+import logging
 import httpx
 import os
 
 load_dotenv()
 api_key = os.getenv('API_KEY')
 
-async def pay_url(db):
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s [%(levelname)s] %(message)s'
+)
+logger = logging.getLogger(__name__)
+
+async def pay_url(db: any) -> dict:
+    ''' Function to return the url of checkout hos
+
+    Args: 
+    db: Database connection
+
+    Return: 
+    checkout: dict that contains URL
+    '''
+
     try:
         async with httpx.AsyncClient() as client:
             response = await client.post(
@@ -38,11 +54,14 @@ async def pay_url(db):
                     "Authorization": f"Bearer {api_key}",
                 }
             )
-            print('response status code', response.status_code)
-        if response.status_code != 200:
-            raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail='Erro ao criar QR Code')
+            logger.info('Response status code:', response.status_code)
+        response.raise_for_status()
+        logger.info('Type of response', type(response.json))
+        checkout = response.json()
 
-        checkout = await response.json()
+        if 'data' not in checkout:
+            logger.error('Data do not exist on checkout')
+            raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail='Payload error, data do not exist ')
         payment_dict = {
             'payment_id': checkout['data']['id'],
             'product_id': checkout['data']['products'][0]['id'],
@@ -57,10 +76,23 @@ async def pay_url(db):
         insert_payment(payment, db)
         return checkout
     except Exception as e:
-        print(e)
+        logger.exception("❌", e)
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=f'{e}')
+    except httpx.RequestError as e:
+        logger.exception('🌐', e)
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=f'{e}')
+        
 
-async def create_customer(db):
+async def create_customer(db: any) -> dict:
+    '''Function to return the customer data
+
+    Args: 
+    db: Database connection
+
+    Return: 
+    checkout: dict that contains customer data
+    '''
+
     try:
         async with httpx.AsyncClient() as client:
             response = await client.post(
@@ -76,10 +108,14 @@ async def create_customer(db):
                     "Authorization": f"Bearer {api_key}",
                 }
             )
+        logger.info('Create a costume response status code:', response.status_code)
+        response.raise_for_status()
+        checkout = response.json()
+        
+        if 'data' not in checkout:
+            logger.error('Data do not exist on checkout')
+            raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail='Payload error, data do not exist ')
 
-        if response.status_code != 200:
-            raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail='Erro ao criar QR Code')
-        checkout = await response.json()
         customer_dict = {
             'customer_id': checkout['data']['id'],
             'name': checkout['data']['metadata']['name'],
@@ -89,11 +125,13 @@ async def create_customer(db):
         }
 
         customer = Customer(**customer_dict)
-        print(customer)
         insert_customer(customer, db)
         return checkout
     except Exception as e:
-        print("❌", e)
+        logger.exception("❌", e)
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=f'{e}')
+    except httpx.RequestError as e:
+        logger.exception('🌐', e)
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=f'{e}')
 
 
