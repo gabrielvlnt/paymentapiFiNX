@@ -85,7 +85,6 @@ async def pay_url(db: any) -> dict:
 
 async def create_customer(db: any) -> dict:
     '''Function to return the customer data
-
     Args: 
     db: Database connection
 
